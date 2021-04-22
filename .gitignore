@@ -1,6 +1,6 @@
 gitignore
 dist
-electron-builder.yml
+electron-builder.env
 GestorSPAs.db
 package-lock.json
 

@@ -1,0 +1,5 @@
+appId: com.ever.spadh
+productName: 'SPA Development Helper'
+publish:
+  provider: github
+  token: ${env.GH_TOKEN}
