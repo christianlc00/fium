@@ -1,0 +1,48 @@
+{
+  "name": "spa-development-helper",
+  "version": "0.0.1",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder build --win --publish never",
+    "deploy": "electron-builder build --win --publish always",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Christian López Carretero",
+    "email": "christian@lopezcarretero.es",
+    "url": "https://christianlopezcarretero.dev"
+  },
+  "contributors": [
+    {
+      "name": "Christian López Carretero",
+      "email": "christian@lopezcarretero.es",
+      "url": "https://christianlopezcarretero.dev"
+    },
+    {
+      "name": "Juan José Rocamora Molina",
+      "email": "juanjo8marzo@gmail.com",
+      "url": "https://github.com/juanjo52 "
+    }
+  ],
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/christianlc00/spa-development-helper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/christianlc00/spa-development-helper/issues"
+  },
+  "homepage": "https://github.com/christianlc00/spa-development-helper#readme",
+  "devDependencies": {
+    "electron": "^12.0.5",
+    "electron-builder": "20.38.0"
+  },
+  "dependencies": {
+    "electron-updater": "4.0.4",
+    "sqlite3": "^5.0.2",
+    "upath": "^2.0.1"
+  }
+}

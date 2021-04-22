@@ -1,0 +1,50 @@
+body {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header, main, footer {
+    padding: 1rem;
+}
+
+main {
+    background-color: #88b100;
+    height: 100%;
+    color: white;
+}
+
+footer {
+    background-color: #88b100;
+    display: flex;
+    justify-content: center;
+    color: white;
+}
+
+footer a {
+    color: white;
+    font-weight: bold;
+    margin: 0 3px;
+}
+
+main a {
+    color: white;
+    transition: all .25s;
+}
+
+main a:hover {
+    font-weight: bold;
+    letter-spacing: 0.025rem;
+}
+
+h3 {
+    margin-top: 0;
+}
+
+.no-select {
+    user-select: none;
+}
+
+#appIcon {
+    width: 100%;
+}

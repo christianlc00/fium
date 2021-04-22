@@ -1,0 +1,75 @@
+@media (max-width:600px) {
+    main {
+        margin-top: 12%;
+    }
+}
+
+@media (min-width:601px) {
+    main {
+        margin-top: 10%;
+    }
+}
+
+@media (min-width:993px) {
+    main {
+        margin-top: 8%;
+    }
+}
+
+@media (min-width:1201px) {
+    main {
+        margin-top: 5%;
+    }
+}
+
+@-webkit-keyframes rotating {
+    from {
+        -webkit-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rotating {
+    from {
+        -ms-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -webkit-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    to {
+        -ms-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -webkit-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+.icon-rotating {
+    -webkit-animation: rotating 2s linear infinite;
+    -moz-animation: rotating 2s linear infinite;
+    -ms-animation: rotating 2s linear infinite;
+    -o-animation: rotating 2s linear infinite;
+    animation: rotating 2s linear infinite;
+}
+
+.no-select {
+    user-select: none;
+}
+
+#updateIcon {
+    cursor: pointer;
+    text-align: right;
+    margin-right: 1.5rem;
+}
+
+nav {
+    background-color: #88b100 !important;
+}

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Configuración</title>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/materialize.min.css">
+    <link rel="stylesheet" href="css/settings.css">
+</head>
+
+<body>
+    <header>
+        <div class="navbar-fixed">
+            <nav class="nav-extended">
+                <div class="nav-wrapper">
+                    <div class="container">
+                        <a href="#" class="brand-logo no-select">SPA Development Helper</a>
+                    </div>
+                    <i id="updateIcon" class="material-icons no-select hide"
+                        onclick="restartApp()">system_update_alt</i>
+                </div>
+                <div class="nav-content">
+                    <div class="container">
+                        <ul class="tabs tabs-transparent no-select">
+                            <li class="tab"><a class="active" href="#tabGeneral"
+                                    onclick="currentTab='tabGeneral'">General</a></li>
+                            <li class="tab"><a href="#tabSPAs" onclick="currentTab='tabSPAs'">SPAs</a></li>
+                            <li class="tab"><a href="#tabEntornos" onclick="currentTab='tabEntornos'">Entornos</a></li>
+                            <li class="tab"><a href="#tabRecursos" onclick="currentTab='tabRecursos'">Recursos</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <div id="tabGeneral" class="col s12">
+                <div class="row">
+                    <div class="col s12" id="generalSettingsForm">
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input id="APACHE_START_FILE" name="APACHE_START_FILE" type="text"
+                                    placeholder="Comando para iniciar Apache">
+                                <label for="APACHE_START_FILE">Comando para iniciar Apache</label>
+                                <span class="helper-text">Por defecto: "C:/xampp/apache_start.bat"</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input id="APACHE_STOP_FILE" name="APACHE_STOP_FILE" type="text"
+                                    placeholder="Comando para detener Apache">
+                                <label for="APACHE_STOP_FILE">Comando para detener Apache</label>
+                                <span class="helper-text">Por defecto: "C:/xampp/apache_stop.bat"</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input id="VHOSTS_PATH" name="VHOSTS_PATH" type="text" placeholder="Archivo VHOSTS">
+                                <label for="VHOSTS_PATH">Ubicación del archivo VHOSTS</label>
+                                <span class="helper-text">
+                                    Por defecto: "C:/xampp/apache/conf/extra/httpd-vhosts.conf"
+                                </span>
+                            </div>
+                        </div>
+                        <div class="fixed-action-btn">
+                            <a class="btn-floating btn-large orange hoverable" id="saveBtn">
+                                <i class="large material-icons no-select">save</i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="tabSPAs" class="col s12">
+                <table class="striped">
+                    <thead>
+                        <tr>
+                            <th class="center-align">Nombre</th>
+                            <th class="center-align">Tipo</th>
+                            <th class="center-align" style="width: 200px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="spaTableList"></tbody>
+                </table>
+                <div class="fixed-action-btn">
+                    <a class="btn-floating btn-large orange hoverable addBtn modal-trigger" href="#createModalSpa">
+                        <i class="large material-icons no-select">add</i>
+                    </a>
+                </div>
+                <div id="createModalSpa" class="modal modal-fixed-footer">
+                    <div class="modal-content">
+                        <h4 class="no-select">CREAR SPA</h4>
+                        <div class="form-content">
+                            <div class="row" id="createSpaForm">
+                                <div class="input-field col s12">
+                                    <input name="nombre" type="text">
+                                    <label for="nombre" class="active">Nombre</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="dominio" type="text">
+                                    <label for="dominio" class="active">Dominio</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <select name="tipo">
+                                        <option value="" disabled selected>Elija una opción</option>
+                                        <option value="APACHE_VHOSTS">Host Virtual de Apache</option>
+                                    </select>
+                                    <label for="tipo">Tipo</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="puerto" type="number">
+                                    <label for="puerto" class="active">Puerto</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="ruta" type="text">
+                                    <label for="ruta" class="active">Ruta</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="dns" type="text">
+                                    <label for="dns" class="active">DNS</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="createModalSpa-btn1"
+                            class="modal-close waves-effect waves-orange btn-flat">Cerrar</button>
+                        <button id="createModalSpa-btn2" class="modal-close waves-effect waves-orange btn-flat"
+                            onclick="sendDataForm('createSpaForm', 'spa')">Crear</button>
+                    </div>
+                </div>
+            </div>
+            <div id="tabEntornos" class="col s12">
+                <table class="striped">
+                    <thead>
+                        <tr>
+                            <th class="center-align">SPA</th>
+                            <th class="center-align">Nombre</th>
+                            <th class="center-align" style="width: 200px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="entornosTableList"></tbody>
+                </table>
+                <div class="fixed-action-btn">
+                    <a class="btn-floating btn-large orange hoverable addBtn modal-trigger" href="#createModalEntorno"
+                        onclick="modalCreateEntornoUpdateSelects()">
+                        <i class="large material-icons no-select">add</i>
+                    </a>
+                </div>
+                <div id="createModalEntorno" class="modal modal-fixed-footer">
+                    <div class="modal-content">
+                        <h4 class="no-select">CREAR ENTORNO</h4>
+                        <div class="form-content">
+                            <div class="row" id="createEntornoForm">
+                                <div class="input-field col s12">
+                                    <input name="nombre" type="text">
+                                    <label for="nombre" class="active">Nombre</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <select id="createModalEntorno_selectSpa" name="spa">
+                                        <option value="" disabled selected>Elija una opción</option>
+                                    </select>
+                                    <label for="spa">Spa</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="proxyPassAPI" type="text">
+                                    <label for="proxyPassAPI" class="active">ProxyPassApi</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="proxyPassReverseAPI" type="text">
+                                    <label for="proxyPassReverseAPI" class="active">ProxyPassReverseApi</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="proxyPassOpenAPI" type="text">
+                                    <label for="proxyPassOpenAPI" class="active">ProxyPassOpenApi</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="proxyPassReverseOpenAPI" type="text">
+                                    <label for="proxyPassReverseOpenAPI" class="active">ProxyPassReverseOpenApi</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="proxyPassSites" type="text">
+                                    <label for="proxyPassSites" class="active">ProxyPassSites</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="proxyPassReverseSites" type="text">
+                                    <label for="proxyPassReverseSites" class="active">ProxyPassReverseSites</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="createModalEntorno-btn1"
+                            class="modal-close waves-effect waves-orange btn-flat">Cerrar</button>
+                        <button id="createModalEntorno-btn2" class="modal-close waves-effect waves-orange btn-flat"
+                            onclick="sendDataForm('createEntornoForm','entorno')">Crear</button>
+                    </div>
+                </div>
+            </div>
+            <div id="tabRecursos" class="col s12">
+                <table class="striped">
+                    <thead>
+                        <tr>
+                            <th class="center-align">Nombre</th>
+                            <th class="center-align">SPA</th>
+                            <th class="center-align">Entorno</th>
+                            <th class="center-align">Credencial</th>
+                            <th class="center-align" style="width: 200px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recursosTableList"></tbody>
+                </table>
+                <div class="fixed-action-btn">
+                    <a class="btn-floating btn-large orange hoverable addBtn modal-trigger" href="#createModalRecurso"
+                        onclick="modalCreateRecursoUpdateSelectSPA()">
+                        <i class="large material-icons no-select">add</i>
+                    </a>
+                </div>
+                <div id="createModalRecurso" class="modal modal-fixed-footer">
+                    <div class="modal-content">
+                        <h4 class="no-select">CREAR RECURSO</h4>
+                        <div class="form-content">
+                            <div class="row" id="createRecursoForm">
+                                <div class="input-field col s12">
+                                    <input name="nombre" type="text">
+                                    <label for="nombre" class="active">Nombre</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <select id="createModalRecurso_selectSpa" name="spa"
+                                        onchange="modalCreateRecursoUpdateSelectEntorno()">
+                                        <option value="" disabled selected>Elija una opción</option>
+                                    </select>
+                                    <label for="spa">Spa</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <select id="createModalRecurso_selectEntorno" name="entorno">
+                                        <option value="" disabled selected>Seleccione primero una SPA</option>
+                                    </select>
+                                    <label for="entorno">Entorno</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="credencial1" type="text">
+                                    <label for="credencial1" class="active">Credencial1</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="tipoCredencial1" type="text">
+                                    <label for="tipoCredencial1" class="active">TipoCredencial1</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="credencial2" type="text">
+                                    <label for="credencial2" class="active">Credencial2</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <input name="tipoCredencial2" type="text">
+                                    <label for="tipoCredencial2" class="active">TipoCredencial2</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="createModalRecurso-btn1" class="modal-close waves-effect waves-orange btn-flat"
+                            onclick="modalCreateRecursoUpdateSelectEntorno()">Cerrar</button>
+                        <button id="createModalRecurso-btn2" class="modal-close waves-effect waves-orange btn-flat"
+                            onclick="sendDataForm('createRecursoForm', 'recurso')">Crear</button>
+                    </div>
+                </div>
+            </div>
+            <div id="viewModal" class="modal modal-fixed-footer">
+                <div class="modal-content">
+                    <h4 class="no-select">View Header</h4>
+                    <div class="form-content">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="viewModal-btn1" class="modal-close waves-effect waves-orange btn-flat">Cerrar</button>
+                </div>
+            </div>
+            <div id="editModal" class="modal modal-fixed-footer">
+                <div class="modal-content">
+                    <h4 class="no-select">Edit Header</h4>
+                    <div class="form-content">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="editModal-btn1" class="modal-close waves-effect waves-orange btn-flat">Cerrar</button>
+                    <button id="editModal-btn2" class="modal-close waves-effect waves-orange btn-flat">Editar</button>
+                </div>
+            </div>
+            <div id="deleteModal" class="modal modal-fixed-footer">
+                <div class="modal-content">
+                    <h4 class="no-select">Delete Header</h4>
+                    <p>¿Seguro que quieres borrar ELEMENTO?</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="deleteModal-btn1" class="modal-close waves-effect waves-orange btn-flat">No</button>
+                    <button id="deleteModal-btn2" class="modal-close waves-effect waves-orange btn-flat">Sí</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="js/materialize.min.js"></script>
+    <script src="js/settings.js"></script>
+</body>
+
+</html>
