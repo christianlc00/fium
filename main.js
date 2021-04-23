@@ -453,7 +453,7 @@ function createSettingsWindow() {
 
     settingsWindow.loadFile(upath.toUnix(upath.join(__dirname, 'settings.html')));
 
-    settingsWindow.on('closed', function () {
+    settingsWindow.on('closed', () => {
         settingsWindow = null;
     });
 
@@ -488,7 +488,7 @@ function createAboutWindow() {
 
     aboutWindow.loadFile(upath.toUnix(upath.join(__dirname, 'about.html')));
 
-    aboutWindow.on('closed', function () {
+    aboutWindow.on('closed', () => {
         aboutWindow = null;
     });
 
@@ -802,6 +802,8 @@ async function saveRecursoForm(data) {
         settingsWindow.webContents.send('fromBackToFront', { action: 'itemSaved', data: { html: '¡SPA Creada!' } });
     }
 }
+
+app.on('window-all-closed', () => {});
 
 ipcMain.on('fromFrontToBack', (event, arg) => {
     let action = arg.action;
