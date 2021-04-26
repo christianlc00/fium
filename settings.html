@@ -92,7 +92,7 @@
                         <i class="large material-icons no-select">add</i>
                     </a>
                 </div>
-                <div id="createModalSpa" class="modal modal-fixed-footer">
+                <div id="createModalSpa" class="modal modal-fixed-footer" onchange="manageDataForm('createSpaForm', 'createModalSpa-btn2')">
                     <div class="modal-content">
                         <h4 class="no-select">CREAR SPA</h4>
                         <div class="form-content">
@@ -130,8 +130,8 @@
                     <div class="modal-footer">
                         <button id="createModalSpa-btn1"
                             class="modal-close waves-effect waves-orange btn-flat">Cerrar</button>
-                        <button id="createModalSpa-btn2" class="modal-close waves-effect waves-orange btn-flat"
-                            onclick="sendDataForm('createSpaForm', 'spa')">Crear</button>
+                        <button id="createModalSpa-btn2" class="modal-close waves-effect waves-orange btn-flat" disabled
+                            onclick="disableButton('createModalSpa-btn2'); sendDataForm('createSpaForm', 'spa');">Crear</button>
                     </div>
                 </div>
             </div>
@@ -152,7 +152,7 @@
                         <i class="large material-icons no-select">add</i>
                     </a>
                 </div>
-                <div id="createModalEntorno" class="modal modal-fixed-footer">
+                <div id="createModalEntorno" class="modal modal-fixed-footer" onchange="manageDataForm('createEntornoForm', 'createModalEntorno-btn2')">
                     <div class="modal-content">
                         <h4 class="no-select">CREAR ENTORNO</h4>
                         <div class="form-content">
@@ -197,8 +197,8 @@
                     <div class="modal-footer">
                         <button id="createModalEntorno-btn1"
                             class="modal-close waves-effect waves-orange btn-flat">Cerrar</button>
-                        <button id="createModalEntorno-btn2" class="modal-close waves-effect waves-orange btn-flat"
-                            onclick="sendDataForm('createEntornoForm','entorno')">Crear</button>
+                        <button id="createModalEntorno-btn2" class="modal-close waves-effect waves-orange btn-flat" disabled
+                            onclick="disableButton('createModalEntorno-btn2'); sendDataForm('createEntornoForm','entorno');">Crear</button>
                     </div>
                 </div>
             </div>
@@ -221,7 +221,7 @@
                         <i class="large material-icons no-select">add</i>
                     </a>
                 </div>
-                <div id="createModalRecurso" class="modal modal-fixed-footer">
+                <div id="createModalRecurso" class="modal modal-fixed-footer" onchange="manageDataForm('createRecursoForm', 'createModalRecurso-btn2')">
                     <div class="modal-content">
                         <h4 class="no-select">CREAR RECURSO</h4>
                         <div class="form-content">
@@ -265,8 +265,8 @@
                     <div class="modal-footer">
                         <button id="createModalRecurso-btn1" class="modal-close waves-effect waves-orange btn-flat"
                             onclick="modalCreateRecursoUpdateSelectEntorno()">Cerrar</button>
-                        <button id="createModalRecurso-btn2" class="modal-close waves-effect waves-orange btn-flat"
-                            onclick="sendDataForm('createRecursoForm', 'recurso')">Crear</button>
+                        <button id="createModalRecurso-btn2" class="modal-close waves-effect waves-orange btn-flat" disabled
+                            onclick="disableButton('createModalRecurso-btn2'); sendDataForm('createRecursoForm', 'recurso');">Crear</button>
                     </div>
                 </div>
             </div>

@@ -177,6 +177,51 @@ function generalSettingsForm() {
     });
 }
 
+function disableButton(sendBtnName){
+    let sendBtn = document.getElementById(sendBtnName);
+    sendBtn.setAttribute('disabled','');
+}
+
+function manageDataForm(formID, sendBtnName){
+    let formulario = document.getElementById(formID);
+
+    let inputs = formulario.getElementsByTagName('input');
+    let selects = formulario.getElementsByTagName('select');
+    let sendBtn = document.getElementById(sendBtnName);
+    sendBtn.setAttribute('disabled','');
+
+    let allFilled = false;
+    let inputsFilled = false;
+    let selectsFilled = false;
+
+    
+    for (let i = 0; i < inputs.length; i++) {
+        if (!inputs[i].classList.contains('select-dropdown') || !inputs[i].classList.contains('dropdown-trigger')) {
+            if(inputs[i].value !== ''){
+                inputsFilled = true;
+            }else{
+                inputsFilled = false;
+            }
+        }
+    }
+    
+    for (let i = 0; i < selects.length; i++) {
+        if(selects[i].value !== ''){
+            selectsFilled = true;
+        }
+        else{
+            selectsFilled = false;
+        }
+    }
+
+    (inputsFilled && selectsFilled)? allFilled = true : allFilled = false;
+    if(allFilled){
+        sendBtn.removeAttribute('disabled');
+    }else{
+        sendBtn.setAttribute('disabled','');
+    }
+}
+
 function sendDataForm(formID, tipo) {
     let formulario = document.getElementById(formID);
 
@@ -188,11 +233,13 @@ function sendDataForm(formID, tipo) {
     for (let i = 0; i < inputs.length; i++) {
         if (!inputs[i].classList.contains('select-dropdown') || !inputs[i].classList.contains('dropdown-trigger')) {
             sendData[inputs[i].name] = inputs[i].value;
+            inputs[i].value = '';
         }
     }
 
     for (let i = 0; i < selects.length; i++) {
         sendData[selects[i].getAttribute('name')] = selects[i].value;
+        selects[i].value = '';
     }
 
     ipcRenderer.send('fromFrontToBack', {
