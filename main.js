@@ -119,7 +119,8 @@ async function init() {
     await createDBs();
     createTrayIcon();
     updateDownloaded = false;
-    getAll();
+    await getAll();
+    reloadApache();
 }
 
 async function createDBs() {
@@ -223,7 +224,7 @@ async function setCurrentENV(env) {
 
 async function setCurrentRES(res) {
     if (await syncDB.exists('SELECTIONS', `spa='${res.spa}'`)) {
-        await syncDB.update('SELECTIONS', `recurso=${res.credencial1}`, `spa='${res.spa}'`);
+        await syncDB.update('SELECTIONS', `recurso='${res.credencial1}'`, `spa='${res.spa}'`);
     } else {
         await syncDB.insert('SELECTIONS', `'${res.spa}', '${res.entorno}', '${res.credencial1}'`);
     }
@@ -279,8 +280,6 @@ async function getAll() {
     if (spaName != '???' && envName != '???') {
         tray.setToolTip(`Ejecutando ${spaName} en entorno ${envName}.`);
     }
-
-    reloadApache();
 }
 
 function buildContextMenu() {
@@ -538,6 +537,7 @@ async function applySelection() {
         let oSPAS = [];
         let oENTORNOS = [];
         let oRECURSOS = [];
+
         rows.forEach(row => {
             let spa = spas.filter(s => s.nombre == row.spa);
             let ent = todosEntornos.filter(e => e.nombre == row.entorno);
@@ -547,7 +547,6 @@ async function applySelection() {
                 oSPAS.push(spa[0]);
                 oENTORNOS.push(ent[0]);
                 oRECURSOS.push(rec[0]);
-
             }
         });
 
