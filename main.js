@@ -39,7 +39,8 @@ let
     entornos,
     todosEntornos,
     recursos,
-    todosRecursos;
+    todosRecursos,
+    updateDownloaded;
 
 const db = new sqlite3.Database('GestorSPAs.db');
 const syncDB = {
@@ -116,6 +117,7 @@ app.whenReady().then(async () => {
 async function init() {
     await createDBs();
     createTrayIcon();
+    updateDownloaded = false;
     getAll();
 }
 
@@ -284,7 +286,9 @@ function buildContextMenu() {
     let recursosItems = [];
     let entornosItems = [];
     let spasItems = [];
-    let otrosItems;
+    let otrosItems = [];
+    let updateItem = [];
+    let exitItem = [];
 
     if (recursos && recursos.length > 0) {
         recursosItems = [];
@@ -378,7 +382,23 @@ function buildContextMenu() {
                     aboutWindow.focus();
                 }
             }
+        }
+    ];
+
+    updateItem = [
+        {
+            type: 'separator'
         },
+        {
+            label: '¡Actualización disponible!',
+            type: 'normal',
+            click() {
+                autoUpdater.quitAndInstall();
+            }
+        }
+    ];
+
+    exitItem = [
         {
             type: 'separator'
         },
@@ -391,10 +411,14 @@ function buildContextMenu() {
         }
     ];
 
+
+
     let contextMenuItems = spasItems;
     contextMenuItems = contextMenuItems.concat(entornosItems);
     contextMenuItems = contextMenuItems.concat(recursosItems);
     contextMenuItems = contextMenuItems.concat(otrosItems);
+    if (updateDownloaded) contextMenuItems = contextMenuItems.concat(updateItem);
+    contextMenuItems = contextMenuItems.concat(exitItem);
 
     contextMenu = Menu.buildFromTemplate(contextMenuItems);
     tray.setContextMenu(contextMenu);
@@ -862,4 +886,6 @@ autoUpdater.on('update-downloaded', () => {
     if (aboutWindow) {
         aboutWindow.webContents.send('update_downloaded');
     }
+    updateDownloaded = true;
+    buildContextMenu();
 });
