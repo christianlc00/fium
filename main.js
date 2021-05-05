@@ -276,6 +276,8 @@ async function getAll() {
     if (spaName != '???' && envName != '???') {
         tray.setToolTip(`Ejecutando ${spaName} en entorno ${envName}.`);
     }
+
+    reloadApache();
 }
 
 function buildContextMenu() {
@@ -528,11 +530,18 @@ async function applySelection() {
     }
 }
 
+function getConfig(configKey) {
+    let result = configs.filter(config => config.clave == configKey)[0];
+    return result ? result.valor : '';
+}
+
 function createVhostsFile(oSPAS, oENTORNOS, oRECURSOS) {
-    fs.writeFileSync('C:/xampp/apache/conf/extra/httpd-vhosts.conf', '');
+    fs.writeFileSync(upath.toUnix(getConfig('VHOSTS_PATH')), '');
+    
     for (let i = 0; i < oSPAS.length; i++) {
         createVhostsSection(oSPAS[i], oENTORNOS[i], oRECURSOS[i]);
     }
+    
     reloadApache();
 }
 
@@ -560,7 +569,7 @@ function createVhostsSection(oSPA, oENTORNO, oRECURSO) {
     SSLProxyCheckPeerExpire off
     
     <ifModule mod_headers.c>
-        RequestHeader append service "${oSPA.nombre}"
+        RequestHeader append SERVICE "${oSPA.nombre}"
         RequestHeader append CLIENT-DNS "${oSPA.dns}"
         
         RequestHeader append X-WASSUP-CRED-USED "${oRECURSO.credencial1}"
@@ -582,14 +591,18 @@ function createVhostsSection(oSPA, oENTORNO, oRECURSO) {
 </VirtualHost>
     `;
 
-    fs.appendFileSync('C:/xampp/apache/conf/extra/httpd-vhosts.conf', template);
+    fs.appendFileSync(upath.toUnix(getConfig('VHOSTS_PATH')), template);
 }
 
 async function reloadApache() {
     tray.setImage(upath.toUnix(upath.join(__dirname, 'img', 'icon_yellow.png')));
-    await execShellCommand('C:/xampp/apache_stop.bat');
+    await execShellCommand(upath.toUnix(getConfig('APACHE_STOP_FILE')));
     tray.setImage(upath.toUnix(upath.join(__dirname, 'img', 'icon_red.png')));
-    execShellCommand('C:/xampp/apache_start.bat');
+    execShellCommand(upath.toUnix(getConfig('APACHE_START_FILE')));
+    let isApacheRunning;
+    do {
+        isApacheRunning = await checkApacheRunning();
+    } while (!isApacheRunning);
     tray.setImage(upath.toUnix(upath.join(__dirname, 'img', 'icon_green.png')));
 }
 
