@@ -2,6 +2,7 @@ const {
     app,
     shell,
     ipcMain,
+    dialog,
     BrowserWindow,
     Tray,
     Menu
@@ -888,4 +889,21 @@ autoUpdater.on('update-downloaded', () => {
     }
     updateDownloaded = true;
     buildContextMenu();
+});
+
+autoUpdater.on('error', () => {
+    let choosed = dialog.showMessageBoxSync({
+        title: 'Error durante la descarga de la actualización',
+        message: 'La descarga de la actualización ha fallado. \nPor favor, descarga manualmente la nueva versión desde GitHub.',
+        type: 'error',
+        buttons: [
+            'Descarga manual',
+            'Cancelar'
+        ],
+        cancelId: 1
+    });
+
+    if (choosed == 0) {
+        shell.openExternal('https://github.com/christianlc00/spa-development-helper/releases/latest');
+    }
 });
