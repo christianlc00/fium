@@ -172,7 +172,16 @@ function generalSettingsForm() {
     settings.configs.forEach(config => {
         let element = document.getElementById(config.clave);
         if (element) {
-            element.value = config.valor;
+            console.log(element);
+            switch(element.type){
+                case 'checkbox':
+                    element.checked = (config.valor == 'true')? true : false;
+                    break;
+                case 'text':
+                default:
+                    element.value = config.valor;
+                    break;
+            }
         }
     });
 }
@@ -232,7 +241,15 @@ function sendDataForm(formID, tipo) {
 
     for (let i = 0; i < inputs.length; i++) {
         if (!inputs[i].classList.contains('select-dropdown') || !inputs[i].classList.contains('dropdown-trigger')) {
-            sendData[inputs[i].name] = inputs[i].value;
+            switch(inputs[i].type){
+                case 'checkbox':
+                    sendData[inputs[i].name] = inputs[i].checked? 'true':'false';
+                    break;
+                case 'text':
+                default:
+                    sendData[inputs[i].name] = inputs[i].value;
+                    break;
+            }
             inputs[i].value = '';
         }
     }
@@ -242,6 +259,7 @@ function sendDataForm(formID, tipo) {
         selects[i].value = '';
     }
 
+    console.log(sendData);
     ipcRenderer.send('fromFrontToBack', {
         action: 'saveForm',
         data: {
