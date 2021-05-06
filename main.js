@@ -53,6 +53,14 @@ const syncDB = {
             });
         });
     },
+    alter: async (table, action, columns) => {
+        let sql = `ALTER TABLE ${table} ${action} ${columns};`;
+        return new Promise(resolve => {
+            db.run(sql, (err, result) => {
+                resolve(result);
+            });
+        });
+    },
     selectAll: async (table, where = null) => {
         where = (where && where.length > 0) ? ` WHERE ${where}` : '';
         let sql = `SELECT rowid as id, * FROM ${table}${where}`;
@@ -168,6 +176,7 @@ async function createDBs() {
         FOREIGN KEY (spa) REFERENCES SPA (nombre) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (entorno) REFERENCES ENTORNO (nombre) ON DELETE CASCADE ON UPDATE CASCADE
     `);
+    await syncDB.alter('RECURSO', 'ADD', 'X_WASSUP_LRA TEXT NOT NULL DEFAULT ""');
     await insertDefaultConfig();
 }
 
@@ -441,12 +450,21 @@ function buildContextMenu() {
         {
             label: 'Configuración',
             type: 'normal',
-            click() {
+            async click() {
                 if (!settingsWindow) {
-                    createSettingsWindow();
+                    await createSettingsWindow();
                 } else {
                     settingsWindow.focus();
                 }
+                settingsWindow.webContents.send('fromBackToFront', {
+                    action: 'allData',
+                    data: {
+                        configs,
+                        spas,
+                        entornos: todosEntornos,
+                        recursos: todosRecursos
+                    }
+                });
             }
         },
         {
@@ -637,11 +655,11 @@ function getConfig(configKey) {
 
 function createVhostsFile(oSPAS, oENTORNOS, oRECURSOS) {
     fs.writeFileSync(upath.toUnix(getConfig('VHOSTS_PATH')), '');
-    
+
     for (let i = 0; i < oSPAS.length; i++) {
         createVhostsSection(oSPAS[i], oENTORNOS[i], oRECURSOS[i]);
     }
-    
+
     reloadApache();
 }
 
@@ -677,7 +695,7 @@ function createVhostsSection(oSPA, oENTORNO, oRECURSO) {
         RequestHeader append X-WASSUP-PA2 "${oRECURSO.credencial2}"
         RequestHeader append X-WASSUP-PA1 "${oRECURSO.tipoCredencial2}"
         
-        RequestHeader append X-WASSUP-LRA "MassMarketMobileUser"
+        RequestHeader append X-WASSUP-LRA "${oRECURSO.X_WASSUP_LRA || 'MassMarketMobileUser'}"
     </ifModule>
     
     ${(oENTORNO.proxyPassAPI && oENTORNO.proxyPassReverseAPI) ? 'ProxyPass ' + oENTORNO.proxyPassAPI : ''}
@@ -924,7 +942,7 @@ async function saveRecursoForm(data) {
     }
 }
 
-app.on('window-all-closed', () => {});
+app.on('window-all-closed', () => { });
 
 ipcMain.on('fromFrontToBack', (event, arg) => {
     let action = arg.action;
