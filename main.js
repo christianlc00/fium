@@ -373,6 +373,72 @@ function buildContextMenu() {
 
     otrosItems = [
         {
+            label: 'Agregar SPA',
+            type: 'normal',
+            async click() {
+                if (!settingsWindow) {
+                    await createSettingsWindow();
+                } else {
+                    settingsWindow.focus();
+                }
+                settingsWindow.webContents.send('fromBackToFront', {
+                    action: 'openModal',
+                    data: {
+                        tab: 'tabSPAs',
+                        configs,
+                        spas,
+                        entornos: todosEntornos,
+                        recursos: todosRecursos
+                    }
+                });
+            }
+        },
+        {
+            label: 'Agregar Entorno',
+            type: 'normal',
+            async click() {
+                if (!settingsWindow) {
+                    await createSettingsWindow();
+                } else {
+                    settingsWindow.focus();
+                }
+                settingsWindow.webContents.send('fromBackToFront', {
+                    action: 'openModal',
+                    data: {
+                        tab: 'tabEntornos',
+                        configs,
+                        spas,
+                        entornos: todosEntornos,
+                        recursos: todosRecursos
+                    }
+                });
+            }
+        },
+        {
+            label: 'Agregar Recurso',
+            type: 'normal',
+            async click() {
+                if (!settingsWindow) {
+                    await createSettingsWindow();
+                } else {
+                    settingsWindow.focus();
+                }
+                settingsWindow.webContents.send('fromBackToFront', {
+                    action: 'openModal',
+                    data: {
+                        tab: 'tabRecursos',
+                        configs,
+                        spas,
+                        entornos: todosEntornos,
+                        recursos: todosRecursos
+                    }
+                });
+            }
+        },
+        {
+            type: 'separator'
+        },
+        {
             label: 'Configuración',
             type: 'normal',
             click() {
@@ -475,7 +541,7 @@ function close() {
     });
 }
 
-function createSettingsWindow() {
+async function createSettingsWindow() {
     settingsWindow = new BrowserWindow({
         width: COMMON_WINDOW_PROPERTIES.width,
         minWidth: COMMON_WINDOW_PROPERTIES.minWidth,
@@ -487,7 +553,7 @@ function createSettingsWindow() {
         webPreferences: COMMON_WINDOW_PROPERTIES.webPreferences
     });
 
-    settingsWindow.loadFile(upath.toUnix(upath.join(__dirname, 'settings.html')));
+    await settingsWindow.loadFile(upath.toUnix(upath.join(__dirname, 'settings.html')));
 
     settingsWindow.on('closed', () => {
         settingsWindow = null;

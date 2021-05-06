@@ -43,12 +43,22 @@ document.addEventListener('DOMContentLoaded', () => {
     createModalsInstances.createModalEntorno = M.Modal.getInstance(createModals.createModalEntorno);
     createModalsInstances.createModalRecurso = M.Modal.getInstance(createModals.createModalRecurso);
 
-    document.getElementById('createModalSpa-btn1').addEventListener('click', () => {
-        createModalsInstances.createModalSpa.close();
-    });
-    document.getElementById('createModalSpa-btn2').addEventListener('click', () => {
-        createModalsInstances.createModalSpa.close();
-    });
+    let closeModalBtns = [
+        {
+            instance: createModalsInstances.createModalSpa,
+            elements: ['createModalSpa-btn1', 'createModalSpa-btn2']
+        },
+        {
+            instance: createModalsInstances.createModalEntorno,
+            elements: ['createModalEntorno-btn1', 'createModalEntorno-btn2']
+        },
+        {
+            instance: createModalsInstances.createModalRecurso,
+            elements: ['createModalRecurso-btn1', 'createModalRecurso-btn2']
+        },
+    ];
+
+    addCloseModalEventListeners(closeModalBtns);
 
     viewModalInstance = M.Modal.getInstance(viewModal);
     editModalInstance = M.Modal.getInstance(editModal);
@@ -83,11 +93,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 itemDeleted(data);
                 break;
             case 'openModal':
+                receiveAllData(data);
                 openModalFromElectron(data);
                 break;
         }
     });
 });
+
+function addCloseModalEventListeners(closeModalBtns) {
+    closeModalBtns.forEach(closeModalBtn => {
+        closeModalBtn.elements.forEach(element => {
+            document.getElementById(element).addEventListener('click', () => {
+                closeModalBtn.instance.close();
+            });
+        });
+    });
+}
 
 function openModalFromElectron(arg){
     let dataTab = arg.tab;
@@ -99,11 +120,12 @@ function openModalFromElectron(arg){
             break;
         case 'tabEntornos':
             tabsInstance.select('tabEntornos');
+            modalCreateEntornoUpdateSelects();
             createModalsInstances.createModalEntorno.open();
-
             break;
         case 'tabRecursos':
             tabsInstance.select('tabRecursos');
+            modalCreateRecursoUpdateSelectSPA();
             createModalsInstances.createModalRecurso.open();
             break;
     }
