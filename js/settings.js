@@ -172,7 +172,6 @@ function generalSettingsForm() {
     settings.configs.forEach(config => {
         let element = document.getElementById(config.clave);
         if (element) {
-            console.log(element);
             switch(element.type){
                 case 'checkbox':
                     element.checked = (config.valor == 'true')? true : false;
@@ -259,7 +258,6 @@ function sendDataForm(formID, tipo) {
         selects[i].value = '';
     }
 
-    console.log(sendData);
     ipcRenderer.send('fromFrontToBack', {
         action: 'saveForm',
         data: {

@@ -184,6 +184,10 @@ async function insertDefaultConfig() {
         {
             clave: 'APACHE_STOP_FILE',
             valor: 'C:/xampp/apache_stop.bat'
+        },
+        {
+            clave: 'AUTO_APPLY',
+            valor: 'false'
         }
     ];
 
@@ -286,9 +290,12 @@ function buildContextMenu() {
     let recursosItems = [];
     let entornosItems = [];
     let spasItems = [];
+    let applyChangesItem = [];
     let otrosItems = [];
     let updateItem = [];
     let exitItem = [];
+
+    let autoApplyChanges = (getConfig('AUTO_APPLY') == 'true') ? true : false;
 
     if (recursos && recursos.length > 0) {
         recursosItems = [];
@@ -300,6 +307,7 @@ function buildContextMenu() {
                 checked: (selections[recursos[i].spa].recurso == recursos[i].credencial1) ? true : false,
                 async click() {
                     await setCurrentRES(recursos[i]);
+                    if (autoApplyChanges) await applySelection();
                 }
             }
 
@@ -353,14 +361,17 @@ function buildContextMenu() {
         });
     }
 
-    otrosItems = [
+    applyChangesItem = [
         {
             label: 'Aplicar Cambios',
             type: 'normal',
             async click() {
                 await applySelection();
             }
-        },
+        }
+    ]
+
+    otrosItems = [
         {
             label: 'Configuración',
             type: 'normal',
@@ -411,11 +422,10 @@ function buildContextMenu() {
         }
     ];
 
-
-
     let contextMenuItems = spasItems;
     contextMenuItems = contextMenuItems.concat(entornosItems);
     contextMenuItems = contextMenuItems.concat(recursosItems);
+    if (!autoApplyChanges) contextMenuItems = contextMenuItems.concat(applyChangesItem);
     contextMenuItems = contextMenuItems.concat(otrosItems);
     if (updateDownloaded) contextMenuItems = contextMenuItems.concat(updateItem);
     contextMenuItems = contextMenuItems.concat(exitItem);
@@ -651,6 +661,8 @@ async function deleteSPA(arg) {
     await syncDB.delete('SPA', `rowid=${arg.id}`);
     spas = await syncDB.selectAll('SPA');
 
+    buildContextMenu();
+
     settingsWindow.webContents.send('fromBackToFront', {
         action: 'itemDeleted',
         data: {
@@ -665,6 +677,8 @@ async function deleteEntorno(arg) {
     await syncDB.delete('ENTORNO', `rowid=${arg.id}`);
     todosEntornos = await syncDB.selectAll('ENTORNO');
 
+    buildContextMenu();
+
     settingsWindow.webContents.send('fromBackToFront', {
         action: 'itemDeleted',
         data: {
@@ -678,6 +692,8 @@ async function deleteEntorno(arg) {
 async function deleteRecurso(arg) {
     await syncDB.delete('RECURSO', `rowid=${arg.id}`);
     todosRecursos = await syncDB.selectAll('RECURSO');
+
+    buildContextMenu();
 
     settingsWindow.webContents.send('fromBackToFront', {
         action: 'itemDeleted',
@@ -770,6 +786,8 @@ async function saveSettingsForm(data) {
 
         if (count == 0) {
             configs = await syncDB.selectAll('CONFIG');
+
+            buildContextMenu();
 
             settingsWindow.webContents.send('fromBackToFront', { action: 'data', data: { tab: 'tabGeneral', data: configs } });
             settingsWindow.webContents.send('fromBackToFront', { action: 'itemSaved', data: { html: '¡Cambios Guardados!' } });
