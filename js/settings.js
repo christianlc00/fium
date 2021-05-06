@@ -1,12 +1,25 @@
 const { ipcRenderer } = require('electron');
 
 let currentTab = 'tabGeneral';
-let settings, updateIcon, createModals, viewModal, editModal, deleteModal, createModalsInstances, viewModalInstance, editModalInstance, deleteModalInstance;
+let settings,
+    updateIcon,  
+    tabs,   
+    createModals, 
+    viewModal,
+    editModal,
+    deleteModal,
+    tabsInstance,
+    createModalsInstances,
+    viewModalInstance,
+    editModalInstance,
+    deleteModalInstance;
 
 document.addEventListener('DOMContentLoaded', () => {
     M.Modal.init(document.querySelectorAll('.modal'), {
         preventScrolling: true
     });
+
+    M.Tabs.init(document.getElementById('tabs'), {});
 
     M.FormSelect.init(document.querySelectorAll('select'), {});
 
@@ -14,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     createModals = {};
 
+    tabs = document.getElementById('tabs');
     createModals.createModalSpa = document.getElementById('createModalSpa');
     createModals.createModalEntorno = document.getElementById('createModalEntorno');
     createModals.createModalRecurso = document.getElementById('createModalRecurso');
@@ -24,9 +38,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     createModalsInstances = {};
 
+    tabsInstance = M.Tabs.getInstance(tabs);
     createModalsInstances.createModalSpa = M.Modal.getInstance(createModals.createModalSpa);
     createModalsInstances.createModalEntorno = M.Modal.getInstance(createModals.createModalEntorno);
     createModalsInstances.createModalRecurso = M.Modal.getInstance(createModals.createModalRecurso);
+
+    document.getElementById('createModalSpa-btn1').addEventListener('click', () => {
+        createModalsInstances.createModalSpa.close();
+    });
+    document.getElementById('createModalSpa-btn2').addEventListener('click', () => {
+        createModalsInstances.createModalSpa.close();
+    });
 
     viewModalInstance = M.Modal.getInstance(viewModal);
     editModalInstance = M.Modal.getInstance(editModal);
@@ -60,15 +82,36 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'itemDeleted':
                 itemDeleted(data);
                 break;
-
+            case 'openModal':
+                openModalFromElectron(data);
+                break;
         }
     });
 });
 
+function openModalFromElectron(arg){
+    let dataTab = arg.tab;
+
+    switch (dataTab) {
+        case 'tabSPAs':
+            tabsInstance.select('tabSPAs');
+            createModalsInstances.createModalSpa.open();
+            break;
+        case 'tabEntornos':
+            tabsInstance.select('tabEntornos');
+            createModalsInstances.createModalEntorno.open();
+
+            break;
+        case 'tabRecursos':
+            tabsInstance.select('tabRecursos');
+            createModalsInstances.createModalRecurso.open();
+            break;
+    }
+}
+
 function itemDeleted(data) {
     receiveData(data);
     showToast(data);
-
 }
 
 function newRow(table, type, object, columns) {
