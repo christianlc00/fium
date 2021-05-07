@@ -43,7 +43,7 @@ let
     todosRecursos,
     updateDownloaded;
 
-const db = new sqlite3.Database('GestorSPAs.db');
+const db = new sqlite3.Database(upath.toUnix(upath.join(app.getPath('userData'), 'GestorSPAs.db')));
 const syncDB = {
     create: async (table, columns) => {
         let sql = `CREATE TABLE IF NOT EXISTS ${table} (${columns})`;
@@ -262,8 +262,9 @@ async function getEntornos() {
 async function getAll() {
     let selectionsResult = await syncDB.select('spa, entorno, recurso', 'SELECTIONS');
 
+    selections = {};
+
     if (selectionsResult && selectionsResult.length > 0) {
-        selections = {};
         selectionsResult.forEach(row => {
             selections[row.spa] = {};
             selections[row.spa].entorno = row.entorno;
