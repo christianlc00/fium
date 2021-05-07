@@ -73,3 +73,8 @@
 nav {
     background-color: #88b100 !important;
 }
+
+.icon-changeVisibility {
+    margin-top: 1rem;
+    cursor: pointer;
+}

@@ -177,6 +177,7 @@ async function createDBs() {
         FOREIGN KEY (entorno) REFERENCES ENTORNO (nombre) ON DELETE CASCADE ON UPDATE CASCADE
     `);
     await syncDB.alter('RECURSO', 'ADD', 'X_WASSUP_LRA TEXT NOT NULL DEFAULT ""');
+    await syncDB.alter('RECURSO', 'ADD', 'credencial TEXT NOT NULL DEFAULT ""');
     await insertDefaultConfig();
 }
 
@@ -931,8 +932,10 @@ async function saveRecursoForm(data) {
             '${data.credencial1}', 
             '${data.tipoCredencial1}', 
             '${data.credencial2}', 
-            '${data.tipoCredencial2}'
-        `, `nombre, spa, entorno, credencial1, tipoCredencial1, credencial2, tipoCredencial2`);
+            '${data.tipoCredencial2}',
+            '${data.X_WASSUP_LRA}',
+            '${data.credencial}'
+        `, `nombre, spa, entorno, credencial1, tipoCredencial1, credencial2, tipoCredencial2, X_WASSUP_LRA, credencial`);
 
         todosRecursos = await syncDB.selectAll('RECURSO');
 

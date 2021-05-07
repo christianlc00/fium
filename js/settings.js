@@ -191,6 +191,9 @@ function buildTable(table) {
             break;
         case 'recursosTableList':
             settings.recursos.forEach(recurso => {
+                recurso.typeFields = {
+                    credencial: 'password'
+                };
                 newRow('recursosTableList', 'recurso', recurso, [recurso.nombre, recurso.spa, recurso.entorno, recurso.credencial1]);
             });
             break;
@@ -355,7 +358,7 @@ function gestionaModalView(nombre, tipo, datos) {
     let contenido = modal.getElementsByClassName('modal-content')[0];
 
     let form = contenido.getElementsByClassName('form-content')[0];
-    let omisiones = ['id'];
+    let omisiones = ['id', 'typeFields'];
     contenido.getElementsByTagName('h4')[0].innerText = 'VER ' + tipo.toUpperCase();
 
     rellenaModalForm(form, nombre, datos, omisiones);
@@ -372,7 +375,7 @@ function gestionaModalEdit(nombre, tipo, datos) {
     let contenido = modal.getElementsByClassName('modal-content')[0];
 
     let form = contenido.getElementsByClassName('form-content')[0];
-    let omisiones = ['id'];
+    let omisiones = ['id', 'typeFields'];
 
     contenido.getElementsByTagName('h4')[0].innerText = 'EDITAR ' + tipo.toUpperCase();
     rellenaModalForm(form, nombre, datos, omisiones);
@@ -400,20 +403,44 @@ function rellenaModalForm(form, nombreModal, datos, omisiones) {
 
     for (let i = 0; i < campos.length; i++) {
         let omitir = false;
+        let typefield = 'text';
+        let eOnClick = '';
+
         omisiones.forEach(omision => {
             if (campos[i][0] == omision)
                 omitir = true;
-        })
+        });
+
+        if (datos.typeFields.hasOwnProperty(campos[i][0])) {
+            typefield = datos.typeFields[campos[i][0]];
+        }
 
         if (!omitir) {
-            html += `
-            <div class="row">
-                <div class="input-field col s12">
-                    <input name="${campos[i][0]}" type="text" placeholder="${('' + campos[i][0]).toLowerCase()}" value="${campos[i][1]}">
-                    <label for="${campos[i][0]}" class="active">${('' + campos[i][0]).replace(/^\w/, (c) => c.toUpperCase())}</label>
-                </div>
-            </div>
-        `;
+            switch(typefield) {
+                case 'password':
+                    html += `
+                        <div class="row">
+                            <div class="input-field col s11">
+                                <input name="${campos[i][0]}" type="${typefield}" onclick="copyToClipboard(this)" placeholder="${('' + campos[i][0]).toLowerCase()}" value="${campos[i][1]}">
+                                <label for="${campos[i][0]}" class="active">${('' + campos[i][0]).replace(/^\w/, (c) => c.toUpperCase())}</label>
+                            </div>
+                            <div class="input-field col s1">
+                                <i class="material-icons icon-changeVisibility" onclick="changeVisibility(this, '${campos[i][0]}')">visibility</i>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                default:
+                    html += `
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input name="${campos[i][0]}" type="${typefield}" placeholder="${('' + campos[i][0]).toLowerCase()}" value="${campos[i][1]}">
+                                <label for="${campos[i][0]}" class="active">${('' + campos[i][0]).replace(/^\w/, (c) => c.toUpperCase())}</label>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
         }
     }
 
@@ -507,6 +534,17 @@ function modalCreateRecursoUpdateSelectEntorno() {
     }
 
     M.FormSelect.init(document.querySelectorAll('select'), {});
+}
+
+function changeVisibility(hideBtn, elementName) {
+    let element = hideBtn.parentElement.parentElement.querySelector(`input[name="${elementName}"]`);
+    if (element.type == 'password') {
+        element.type = 'text';
+        hideBtn.innerHTML = 'visibility_off';
+    } else {
+        element.type = 'password';
+        hideBtn.innerHTML = 'visibility';
+    }
 }
 
 ipcRenderer.send('app_version');
