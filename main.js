@@ -665,9 +665,12 @@ async function applySelection() {
     let rows = await syncDB.selectAll('SELECTIONS');
 
     if (rows && rows.length > 0) {
-        let oSPAS = [];
-        let oENTORNOS = [];
-        let oRECURSOS = [];
+        let vHostsSPAS = [];
+        let vHostsENTORNOS = [];
+        let vHostsRECURSOS = [];
+        let expressSPAS = [];
+        let expressENTORNOS = [];
+        let expressRECURSOS = [];
 
         rows.forEach(row => {
             let spa = spas.filter(s => s.codigo == row.spa);
@@ -675,13 +678,20 @@ async function applySelection() {
             let rec = todosRecursos.filter(r => r.codigo == row.recurso);
 
             if (spa.length > 0 && ent.length > 0 && rec.length > 0) {
-                oSPAS.push(spa[0]);
-                oENTORNOS.push(ent[0]);
-                oRECURSOS.push(rec[0]);
+                if (spa[0].tipo == 'APACHE_VHOSTS') {
+                    vHostsSPAS.push(spa[0]);
+                    vHostsENTORNOS.push(ent[0]);
+                    vHostsRECURSOS.push(rec[0]);
+                } else {
+                    expressSPAS.push(spa[0]);
+                    expressENTORNOS.push(ent[0]);
+                    expressRECURSOS.push(rec[0]);
+                }
             }
         });
 
-        createVhostsFile(oSPAS, oENTORNOS, oRECURSOS);
+        createVhostsFile(vHostsSPAS, vHostsENTORNOS, vHostsRECURSOS);
+        createExpressFiles(expressSPAS, expressENTORNOS, expressRECURSOS);
     }
 }
 
@@ -698,6 +708,34 @@ function createVhostsFile(oSPAS, oENTORNOS, oRECURSOS) {
     }
 
     reloadApache();
+}
+
+function createExpressFiles(oSPAS, oENTORNOS, oRECURSOS) {
+    for (let i = 0; i < oSPAS.length; i++) {
+        createExpressFile(oSPAS[i], oENTORNOS[i], oRECURSOS[i]);
+    }
+}
+
+function createExpressFile(oSPA, oENTORNO, oRECURSO) {
+    let file = {
+        entorno: {
+            shortName: oENTORNO.nombre,
+            apiServerURL: oENTORNO.proxyPassAPI,
+            OCSServerURL: oENTORNO.proxyPassSites,
+            myaddressServerURL: oENTORNO.proxyPassOpenAPI
+        },
+        recurso: {
+            shortName: oRECURSO.nombre,
+            properties: {}
+        }
+    };
+
+    let headers = Object.entries(oRECURSO.headers);
+    for (let i = 0; i < headers.length; i++) {
+        file.recurso.properties[headers[i][0]] = headers[i][1];
+    }
+
+    fs.writeFileSync(upath.toUnix(upath.join(oSPA.ruta, 'SDH.json')), JSON.stringify(file));
 }
 
 function createVhostsSection(oSPA, oENTORNO, oRECURSO) {

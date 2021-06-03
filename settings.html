@@ -10,6 +10,7 @@
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="css/materialize.min.css">
+    <link rel="stylesheet" href="css/materialize.custom.css">
     <link rel="stylesheet" href="css/settings.css">
 </head>
 
@@ -72,7 +73,7 @@
                             </div>
                         </div>
                         <div class="fixed-action-btn">
-                            <a class="btn-floating btn-large orange hoverable" id="saveBtn">
+                            <a class="btn-floating btn-large blue lighten-2 hoverable" id="saveBtn">
                                 <i class="large material-icons no-select">save</i>
                             </a>
                         </div>
@@ -91,7 +92,7 @@
                     <tbody id="spaTableList"></tbody>
                 </table>
                 <div class="fixed-action-btn">
-                    <a class="btn-floating btn-large orange hoverable addBtn modal-trigger" href="#createModalSpa">
+                    <a class="btn-floating btn-large blue lighten-2 hoverable addBtn modal-trigger" href="#createModalSpa">
                         <i class="large material-icons no-select">add</i>
                     </a>
                 </div>
@@ -152,7 +153,7 @@
                     <tbody id="entornosTableList"></tbody>
                 </table>
                 <div class="fixed-action-btn">
-                    <a class="btn-floating btn-large orange hoverable addBtn modal-trigger" href="#createModalEntorno"
+                    <a class="btn-floating btn-large blue lighten-2 hoverable addBtn modal-trigger" href="#createModalEntorno"
                         onclick="modalCreateEntornoUpdateSelects()">
                         <i class="large material-icons no-select">add</i>
                     </a>
@@ -222,7 +223,7 @@
                     <tbody id="recursosTableList"></tbody>
                 </table>
                 <div class="fixed-action-btn">
-                    <a class="btn-floating btn-large orange hoverable addBtn modal-trigger" href="#createModalRecurso"
+                    <a class="btn-floating btn-large blue lighten-2 hoverable addBtn modal-trigger" href="#createModalRecurso"
                         onclick="modalCreateRecursoUpdateSelectSPA()">
                         <i class="large material-icons no-select">add</i>
                     </a>
@@ -258,19 +259,19 @@
                                                 <th colspan="2">Valor</th>
                                             </tr>
                                         </thead>
-                                        <tbody></tbody>
+                                        <tbody id="createModalRecurso_tableHeaders"></tbody>
                                         <tfoot>
                                             <tr>
                                                 <td colspan="3">
                                                     <div class="col s10">
-                                                        <button class="waves-effect waves-teal btn-large"
+                                                        <button class="btn-large blue lighten-2"
                                                             title="Agregar header" style="width: 100%;"
                                                             onclick="addHeaderRow(this);">
                                                             <i class="material-icons">add</i>
                                                         </button>
                                                     </div>
                                                     <div class="col s2">
-                                                        <button class="waves-effect waves-teal btn-large"
+                                                        <button class="btn-large blue lighten-2"
                                                             title="Agregar headers recomendadas" style="width: 100%;"
                                                             onclick="addRecommendedHeadersRows(this);">
                                                             <i class="material-icons">playlist_add</i>

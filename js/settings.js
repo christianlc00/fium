@@ -540,11 +540,13 @@ function modalCreateEntornoUpdateSelects() {
 
 function modalCreateRecursoUpdateSelectSPA() {
     let select = document.getElementById('createModalRecurso_selectSpa');
+    let table = document.getElementById('createModalRecurso_tableHeaders');
     let html = '<option value="" disabled selected>Elija una opción</option>';
     settings.spas.forEach(spa => {
         html += `<option value="${spa.codigo}">${spa.nombre}</option>`
     });
     select.innerHTML = html;
+    table.innerHTML = ''; 
 
     M.FormSelect.init(document.querySelectorAll('select'), {});
 }
@@ -594,28 +596,68 @@ function addHeaderRow(element, key = '', value = '') {
 }
 
 function addRecommendedHeadersRows(element) {
-    let recommendedHeaders = [
-        {
-            key: 'X-WASSUP-CRED-USED',
-            value: ''
-        },
-        {
-            key: 'X-WASSUP-CREDTYPE-USED',
-            value: ''
-        },
-        {
-            key: 'X-WASSUP-PA2',
-            value: ''
-        },
-        {
-            key: 'X-WASSUP-PA1',
-            value: ''
-        },
-        {
-            key: 'X-WASSUP-LRA',
-            value: 'MassMarketMobileUser'
-        }
-    ];
+    let recommendedHeaders;
+
+    let selectedSPACode = element.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('select[name="spa"]').value;
+
+    let template = settings.spas.filter(spa => spa.codigo == selectedSPACode)[0].tipo;
+    console.log(template);
+
+    if (template == 'APACHE_VHOSTS') {
+        recommendedHeaders = [
+            {
+                key: 'X-WASSUP-CRED-USED',
+                value: ''
+            },
+            {
+                key: 'X-WASSUP-CREDTYPE-USED',
+                value: ''
+            },
+            {
+                key: 'X-WASSUP-PA2',
+                value: ''
+            },
+            {
+                key: 'X-WASSUP-PA1',
+                value: ''
+            },
+            {
+                key: 'X-WASSUP-LRA',
+                value: 'MassMarketMobileUser'
+            }
+        ];
+    } else {
+        recommendedHeaders = [
+            {
+                key: 'loginType',
+                value: 'MSISDN'
+            },
+            {
+                key: 'site',
+                value: ''
+            },
+            {
+                key: 'rol',
+                value: 'MassMarketFixUser,MassMarketMobileUser'
+            },
+            {
+                key: 'sfid',
+                value: '17000000'
+            },
+            {
+                key: 'zrol',
+                value: 'eRES'
+            },
+            {
+                key: 'privacy',
+                value: 'private'
+            },
+            {
+                key: 'zlogin',
+                value: 'PAN_PDV'
+            }
+        ];
+    }
     recommendedHeaders.forEach(header => {
         addHeaderRow(element, header.key, header.value);
     });
