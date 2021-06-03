@@ -3,6 +3,7 @@ const {
     shell,
     ipcMain,
     dialog,
+    screen,
     BrowserWindow,
     Tray,
     Menu
@@ -594,10 +595,12 @@ function close() {
 }
 
 async function createSettingsWindow() {
+    let mainScreen = screen.getPrimaryDisplay().size;
+
     settingsWindow = new BrowserWindow({
-        width: COMMON_WINDOW_PROPERTIES.width,
+        width: (mainScreen.width / 1.5),
         minWidth: COMMON_WINDOW_PROPERTIES.minWidth,
-        height: COMMON_WINDOW_PROPERTIES.height,
+        height: (mainScreen.height / 1.25),
         minHeight: COMMON_WINDOW_PROPERTIES.minHeight,
         autoHideMenuBar: COMMON_WINDOW_PROPERTIES.autoHideMenuBar,
         frame: COMMON_WINDOW_PROPERTIES.frame,
