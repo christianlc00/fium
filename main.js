@@ -79,6 +79,19 @@ const syncDB = {
             });
         });
     },
+    selectOne: async (fields, table, where = null) => {
+        where = (where && where.length > 0) ? ` WHERE ${where}` : '';
+        let sql = `SELECT ${fields} FROM ${table}${where}`;
+        return new Promise(resolve => {
+            db.all(sql, (err, rows) => {
+                if (rows.length > 0) {
+                    resolve(rows[0]);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    },
     exists: async (table, where) => {
         let sql = `SELECT rowid FROM ${table} WHERE ${where}`;
         return new Promise(resolve => {
@@ -140,19 +153,22 @@ async function createDBs() {
         spa TEXT NOT NULL,
         entorno TEXT NOT NULL,
         recurso TEXT NOT NULL,
-        FOREIGN KEY (spa) REFERENCES RECURSO (spa) ON DELETE CASCADE ON UPDATE CASCADE
-        FOREIGN KEY (entorno) REFERENCES RECURSO (entorno) ON DELETE CASCADE ON UPDATE CASCADE
-        FOREIGN KEY (recurso) REFERENCES RECURSO (credencial1) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY(spa) REFERENCES RECURSO(spa) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY(entorno) REFERENCES RECURSO(entorno) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY(recurso) REFERENCES RECURSO(credencial1) ON DELETE CASCADE ON UPDATE CASCADE
     `);
     await syncDB.create('SPA', `
-        nombre TEXT NOT NULL PRIMARY KEY,
-        dominio TEXT NOT NULL UNIQUE,
+        codigo INTEGER NOT NULL,
+        nombre TEXT NOT NULL,
+        dominio TEXT NOT NULL,
         tipo TEXT NOT NULL,
         puerto TEXT NOT NULL DEFAULT 80,
         ruta TEXT NOT NULL,
-        dns TEXT NOT NULL
+        dns TEXT NOT NULL,
+        PRIMARY KEY(codigo AUTOINCREMENT)
     `);
     await syncDB.create('ENTORNO', `
+        codigo INTEGER NOT NULL DEFAULT "",
         nombre TEXT NOT NULL,
         spa TEXT NOT NULL,
         proxyPassAPI TEXT NOT NULL,
@@ -161,23 +177,30 @@ async function createDBs() {
         proxyPassReverseOpenAPI TEXT NOT NULL,
         proxyPassSites TEXT NOT NULL,
         proxyPassReverseSites TEXT NOT NULL,
-        PRIMARY KEY(nombre, spa),
-        FOREIGN KEY (spa) REFERENCES SPA (nombre) ON DELETE CASCADE ON UPDATE CASCADE
+        PRIMARY KEY(codigo AUTOINCREMENT),
+        FOREIGN KEY(spa) REFERENCES SPA(codigo) ON DELETE CASCADE ON UPDATE CASCADE
     `);
     await syncDB.create('RECURSO', `
+        codigo INTEGER NOT NULL DEFAULT "",
         nombre TEXT NOT NULL,
         spa TEXT NOT NULL,
         entorno TEXT NOT NULL,
-        credencial1 TEXT NOT NULL,
-        tipoCredencial1 TEXT NOT NULL,
-        credencial2 TEXT NOT NULL,
-        tipoCredencial2 TEXT NOT NULL,
-        PRIMARY KEY(spa, entorno, credencial1),
-        FOREIGN KEY (spa) REFERENCES SPA (nombre) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (entorno) REFERENCES ENTORNO (nombre) ON DELETE CASCADE ON UPDATE CASCADE
+        PRIMARY KEY(codigo AUTOINCREMENT),
+        FOREIGN KEY(spa) REFERENCES SPA(codigo) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY(entorno) REFERENCES ENTORNO(codigo) ON DELETE CASCADE ON UPDATE CASCADE
     `);
-    await syncDB.alter('RECURSO', 'ADD', 'X_WASSUP_LRA TEXT NOT NULL DEFAULT ""');
+    await syncDB.create('RECURSO_HEADER', `
+        recurso INTEGER NOT NULL,
+        header TEXT NOT NULL,
+        valor TEXT,
+        FOREIGN KEY(recurso) REFERENCES RECURSO(codigo) ON DELETE CASCADE ON UPDATE CASCADE
+    `);
+    await migrateDBs();
     await insertDefaultConfig();
+}
+
+async function migrateDBs() {
+    // await syncDB.alter('RECURSO', 'ADD', 'X_WASSUP_LRA TEXT NOT NULL DEFAULT ""');
 }
 
 async function insertDefaultConfig() {
@@ -208,14 +231,14 @@ async function insertDefaultConfig() {
 }
 
 async function setCurrentSPA(sp) {
-    if (!(await syncDB.exists('SELECTIONS', `spa='${sp.nombre}'`))) {
-        await syncDB.insert('SELECTIONS', `'${sp.nombre}'`, 'spa');
+    if (!(await syncDB.exists('SELECTIONS', `spa='${sp.codigo}'`))) {
+        await syncDB.insert('SELECTIONS', `'${sp.codigo}'`, 'spa');
     }
 
     if (await syncDB.exists('CONFIG', `clave='CURRENT_SPA'`)) {
-        await syncDB.update('CONFIG', `valor='${sp.nombre}'`, `clave='CURRENT_SPA'`);
+        await syncDB.update('CONFIG', `valor='${sp.codigo}'`, `clave='CURRENT_SPA'`);
     } else {
-        await syncDB.insert('CONFIG', `'CURRENT_SPA', '${sp.nombre}'`);
+        await syncDB.insert('CONFIG', `'CURRENT_SPA', '${sp.codigo}'`);
     }
 
     spa = sp;
@@ -225,9 +248,9 @@ async function setCurrentSPA(sp) {
 
 async function setCurrentENV(env) {
     if (await syncDB.exists('SELECTIONS', `spa='${env.spa}'`)) {
-        await syncDB.update('SELECTIONS', `entorno='${env.nombre}', recurso=''`, `spa='${env.spa}'`)
+        await syncDB.update('SELECTIONS', `entorno='${env.codigo}', recurso=''`, `spa='${env.spa}'`)
     } else {
-        await syncDB.insert('SELECTIONS', `'${env.spa}', '${env.nombre}', ''`, 'spa, entorno, recurso');
+        await syncDB.insert('SELECTIONS', `'${env.spa}', '${env.codigo}', ''`, 'spa, entorno, recurso');
     }
 
     entorno = env;
@@ -237,9 +260,9 @@ async function setCurrentENV(env) {
 
 async function setCurrentRES(res) {
     if (await syncDB.exists('SELECTIONS', `spa='${res.spa}'`)) {
-        await syncDB.update('SELECTIONS', `recurso='${res.credencial1}'`, `spa='${res.spa}'`);
+        await syncDB.update('SELECTIONS', `recurso='${res.codigo}'`, `spa='${res.spa}'`);
     } else {
-        await syncDB.insert('SELECTIONS', `'${res.spa}', '${res.entorno}', '${res.credencial1}'`);
+        await syncDB.insert('SELECTIONS', `'${res.spa}', '${res.entorno}', '${res.codigo}'`);
     }
 
     recurso = res;
@@ -250,6 +273,16 @@ async function setCurrentRES(res) {
 async function getRecursos() {
     if (selections && selections.currentSPA && selections[selections.currentSPA] && selections[selections.currentSPA].entorno) {
         recursos = await syncDB.selectAll('RECURSO', `spa='${selections.currentSPA}' AND entorno='${selections[selections.currentSPA].entorno}'`);
+    }
+}
+async function getTodosRecursos() {
+    todosRecursos = await syncDB.selectAll('RECURSO');
+    for (let i = 0; i < todosRecursos.length; i++) {
+        let headers = await syncDB.selectAll('RECURSO_HEADER', `recurso='${todosRecursos[i].codigo}'`);
+        todosRecursos[i].headers = {};
+        headers.forEach(header => {
+            todosRecursos[i].headers[header.header] = header.valor;
+        });
     }
 }
 
@@ -284,7 +317,7 @@ async function getAll() {
     configs = await syncDB.selectAll('CONFIG');
     spas = await syncDB.selectAll('SPA');
     todosEntornos = await syncDB.selectAll('ENTORNO');
-    todosRecursos = await syncDB.selectAll('RECURSO');
+    await getTodosRecursos();
 
     buildContextMenu();
 
@@ -312,7 +345,7 @@ function buildContextMenu() {
 
         for (let i = 0; i < recursos.length; i++) {
             let item = {
-                label: `${recursos[i].nombre} - ${recursos[i].credencial1}`,
+                label: `${recursos[i].nombre}`,
                 type: 'radio',
                 checked: (selections[recursos[i].spa].recurso == recursos[i].credencial1) ? true : false,
                 async click() {
@@ -634,9 +667,9 @@ async function applySelection() {
         let oRECURSOS = [];
 
         rows.forEach(row => {
-            let spa = spas.filter(s => s.nombre == row.spa);
-            let ent = todosEntornos.filter(e => e.nombre == row.entorno);
-            let rec = todosRecursos.filter(r => r.credencial1 == row.recurso);
+            let spa = spas.filter(s => s.codigo == row.spa);
+            let ent = todosEntornos.filter(e => e.codigo == row.entorno);
+            let rec = todosRecursos.filter(r => r.codigo == row.recurso);
 
             if (spa.length > 0 && ent.length > 0 && rec.length > 0) {
                 oSPAS.push(spa[0]);
@@ -665,6 +698,12 @@ function createVhostsFile(oSPAS, oENTORNOS, oRECURSOS) {
 }
 
 function createVhostsSection(oSPA, oENTORNO, oRECURSO) {
+    let headers = Object.entries(oRECURSO.headers);
+    let headersHTML = '';
+    for (let i = 0; i < headers.length; i++) {
+        headersHTML += `
+        RequestHeader append ${headers[i][0]} "${headers[i][1]}"`;
+    }
     let template = `
 <VirtualHost ${oSPA.dominio}:${oSPA.puerto}>
     DocumentRoot "${oSPA.ruta}"
@@ -690,13 +729,7 @@ function createVhostsSection(oSPA, oENTORNO, oRECURSO) {
     <ifModule mod_headers.c>
         RequestHeader append SERVICE "${oSPA.nombre}"
         RequestHeader append CLIENT-DNS "${oSPA.dns}"
-        
-        RequestHeader append X-WASSUP-CRED-USED "${oRECURSO.credencial1}"
-        RequestHeader append X-WASSUP-CREDTYPE-USED "${oRECURSO.tipoCredencial1}"
-        RequestHeader append X-WASSUP-PA2 "${oRECURSO.credencial2}"
-        RequestHeader append X-WASSUP-PA1 "${oRECURSO.tipoCredencial2}"
-        
-        RequestHeader append X-WASSUP-LRA "${oRECURSO.X_WASSUP_LRA || 'MassMarketMobileUser'}"
+        ${headersHTML}
     </ifModule>
     
     ${(oENTORNO.proxyPassAPI && oENTORNO.proxyPassReverseAPI) ? 'ProxyPass ' + oENTORNO.proxyPassAPI : ''}
@@ -776,7 +809,8 @@ async function deleteEntorno(arg) {
 
 async function deleteRecurso(arg) {
     await syncDB.delete('RECURSO', `rowid=${arg.id}`);
-    todosRecursos = await syncDB.selectAll('RECURSO');
+    await syncDB.delete('RECURSO_HEADER', `recurso=${arg.codigo}`);
+    await getTodosRecursos();
 
     buildContextMenu();
 
@@ -927,14 +961,24 @@ async function saveRecursoForm(data) {
         await syncDB.insert('RECURSO', `
             '${data.nombre}', 
             '${data.spa}', 
-            '${data.entorno}', 
-            '${data.credencial1}', 
-            '${data.tipoCredencial1}', 
-            '${data.credencial2}', 
-            '${data.tipoCredencial2}'
-        `, `nombre, spa, entorno, credencial1, tipoCredencial1, credencial2, tipoCredencial2`);
+            '${data.entorno}'
+        `, `nombre, spa, entorno`);
 
-        todosRecursos = await syncDB.selectAll('RECURSO');
+        if (data.headers) {
+            let headers = Object.entries(data.headers);
+
+            let codigoRecurso = (await syncDB.selectOne('codigo', 'RECURSO', `spa='${data.spa}' AND entorno='${data.entorno}' AND nombre='${data.nombre}'`)).codigo;
+
+            for (let i = 0; i < headers.length; i++) {
+                await syncDB.insert('RECURSO_HEADER', `
+                    '${codigoRecurso}', 
+                    '${headers[i][0]}', 
+                    '${headers[i][1]}'
+                `, `recurso, header, valor`);
+            }
+        }
+
+        await getTodosRecursos();
 
         buildContextMenu();
 

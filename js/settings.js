@@ -186,12 +186,15 @@ function buildTable(table) {
             break;
         case 'entornosTableList':
             settings.entornos.forEach(entorno => {
-                newRow('entornosTableList', 'entorno', entorno, [entorno.spa, entorno.nombre]);
+                entorno.spa = settings.spas.filter(spa => entorno.spa == spa.codigo)[0];
+                newRow('entornosTableList', 'entorno', entorno, [entorno.spa.nombre, entorno.nombre]);
             });
             break;
         case 'recursosTableList':
             settings.recursos.forEach(recurso => {
-                newRow('recursosTableList', 'recurso', recurso, [recurso.nombre, recurso.spa, recurso.entorno, recurso.credencial1]);
+                recurso.spa = settings.spas.filter(spa => recurso.spa == spa.codigo)[0];
+                recurso.entorno = settings.entornos.filter(entorno => recurso.entorno == entorno.codigo)[0];
+                newRow('recursosTableList', 'recurso', recurso, [recurso.nombre, recurso.spa.nombre, recurso.entorno.nombre]);
             });
             break;
     }
@@ -303,8 +306,14 @@ function sendDataForm(formID, tipo) {
     let inputs = formulario.getElementsByTagName('input');
     let selects = formulario.getElementsByTagName('select');
 
+    let headerKeys = [], headerValues = [];
+
     for (let i = 0; i < inputs.length; i++) {
-        if (!inputs[i].classList.contains('select-dropdown') || !inputs[i].classList.contains('dropdown-trigger')) {
+        if (
+            !inputs[i].classList.contains('select-dropdown') &&
+            !inputs[i].classList.contains('dropdown-trigger') &&
+            !inputs[i].classList.contains('header')
+        ) {
             switch(inputs[i].type){
                 case 'checkbox':
                     sendData[inputs[i].name] = inputs[i].checked? 'true':'false';
@@ -315,6 +324,20 @@ function sendDataForm(formID, tipo) {
                     break;
             }
             inputs[i].value = '';
+        } else if (inputs[i].classList.contains('header')) {
+            if (inputs[i].classList.contains('headerKey')) {
+                headerKeys.push(inputs[i].value);
+            } else if (inputs[i].classList.contains('headerValue')) {
+                headerValues.push(inputs[i].value);
+            }
+        }
+    }
+
+    if (headerKeys.length > 0 && headerValues.length > 0 && headerKeys.length == headerValues.length) {
+        sendData.headers = {};
+
+        for(let i = 0; i < headerKeys.length; i++) {
+            sendData.headers[headerKeys[i]] = headerValues[i];
         }
     }
 
@@ -355,7 +378,7 @@ function gestionaModalView(nombre, tipo, datos) {
     let contenido = modal.getElementsByClassName('modal-content')[0];
 
     let form = contenido.getElementsByClassName('form-content')[0];
-    let omisiones = ['id'];
+    let omisiones = ['id', 'codigo'];
     contenido.getElementsByTagName('h4')[0].innerText = 'VER ' + tipo.toUpperCase();
 
     rellenaModalForm(form, nombre, datos, omisiones);
@@ -372,7 +395,7 @@ function gestionaModalEdit(nombre, tipo, datos) {
     let contenido = modal.getElementsByClassName('modal-content')[0];
 
     let form = contenido.getElementsByClassName('form-content')[0];
-    let omisiones = ['id'];
+    let omisiones = ['id', 'codigo'];
 
     contenido.getElementsByTagName('h4')[0].innerText = 'EDITAR ' + tipo.toUpperCase();
     rellenaModalForm(form, nombre, datos, omisiones);
@@ -406,14 +429,50 @@ function rellenaModalForm(form, nombreModal, datos, omisiones) {
         })
 
         if (!omitir) {
-            html += `
-            <div class="row">
-                <div class="input-field col s12">
-                    <input name="${campos[i][0]}" type="text" placeholder="${('' + campos[i][0]).toLowerCase()}" value="${campos[i][1]}">
-                    <label for="${campos[i][0]}" class="active">${('' + campos[i][0]).replace(/^\w/, (c) => c.toUpperCase())}</label>
+            if (campos[i][0] == 'headers') {
+                let tableHTML = `
+                    <table class="striped">
+                        <thead>
+                            <tr>
+                                <th>Header</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                let headers = Object.entries(campos[i][1]);
+                for (let e = 0; e < headers.length; e++) {
+                    tableHTML += `
+                        <tr>
+                            <td>${headers[e][0]}</td>
+                            <td>${headers[e][1]}</td>
+                        </tr>
+                    `;
+                }
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+                html += tableHTML;
+            } else if (campos[i][1].nombre) {
+                html += `
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input name="${campos[i][0]}" type="text" placeholder="${('' + campos[i][0]).toLowerCase()}" value="${campos[i][1].nombre}">
+                        <label for="${campos[i][0]}" class="active">${('' + campos[i][0]).replace(/^\w/, (c) => c.toUpperCase())}</label>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+            } else {
+                html += `
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input name="${campos[i][0]}" type="text" placeholder="${('' + campos[i][0]).toLowerCase()}" value="${campos[i][1]}">
+                            <label for="${campos[i][0]}" class="active">${('' + campos[i][0]).replace(/^\w/, (c) => c.toUpperCase())}</label>
+                        </div>
+                    </div>
+                `;
+            }
         }
     }
 
@@ -471,7 +530,7 @@ function modalCreateEntornoUpdateSelects() {
     let html = '<option value="" disabled selected>Elija una opción</option>';
 
     settings.spas.forEach(spa => {
-        html += `<option value="${spa.nombre}">${spa.nombre}</option>`
+        html += `<option value="${spa.codigo}">${spa.nombre}</option>`
     });
     
     select.innerHTML = html;
@@ -483,7 +542,7 @@ function modalCreateRecursoUpdateSelectSPA() {
     let select = document.getElementById('createModalRecurso_selectSpa');
     let html = '<option value="" disabled selected>Elija una opción</option>';
     settings.spas.forEach(spa => {
-        html += `<option value="${spa.nombre}">${spa.nombre}</option>`
+        html += `<option value="${spa.codigo}">${spa.nombre}</option>`
     });
     select.innerHTML = html;
 
@@ -496,9 +555,9 @@ function modalCreateRecursoUpdateSelectEntorno() {
     
     if (spaSelected != '') {
         let html = '<option value="" disabled selected>Elija una opción</option>';
-        let entornosSelect = settings.entornos.filter(ent => ent.spa == spaSelected);
+        let entornosSelect = settings.entornos.filter(ent => ent.codigo == spaSelected);
         entornosSelect.forEach(ent => {
-            html += `<option value="${ent.nombre}">${ent.nombre}</option>`
+            html += `<option value="${ent.codigo}">${ent.nombre}</option>`
         });
         selectEntorno.innerHTML = html;
     } else {
@@ -507,6 +566,65 @@ function modalCreateRecursoUpdateSelectEntorno() {
     }
 
     M.FormSelect.init(document.querySelectorAll('select'), {});
+}
+
+function addHeaderRow(element, key = '', value = '') {
+    let rows = element.parentNode.parentNode.parentNode.parentNode.parentNode.getElementsByTagName('tbody')[0];
+    let row = document.createElement('tr');
+    row.innerHTML = `
+    <td>
+        <div class="input-field col s12">
+            <input name="clave[]" class="header headerKey" type="text" value=${key}>
+        </div>
+    </td>
+    <td>
+        <div class="input-field col s12">
+            <input name="valor[]" class="header headerValue" type="text" value=${value}>
+        </div>
+    </td>
+    <td>
+        <div class="col s12 center-align">
+            <button class="waves-effect waves-teal btn-flat" onclick="delHeaderRow(this);">
+                <i class="material-icons">delete</i>
+            </button>
+        </div>
+    </td>
+    `;
+    rows.appendChild(row)
+}
+
+function addRecommendedHeadersRows(element) {
+    let recommendedHeaders = [
+        {
+            key: 'X-WASSUP-CRED-USED',
+            value: ''
+        },
+        {
+            key: 'X-WASSUP-CREDTYPE-USED',
+            value: ''
+        },
+        {
+            key: 'X-WASSUP-PA2',
+            value: ''
+        },
+        {
+            key: 'X-WASSUP-PA1',
+            value: ''
+        },
+        {
+            key: 'X-WASSUP-LRA',
+            value: 'MassMarketMobileUser'
+        }
+    ];
+    recommendedHeaders.forEach(header => {
+        addHeaderRow(element, header.key, header.value);
+    });
+}
+
+function delHeaderRow(element) {
+    let row = element.parentNode.parentNode.parentNode;
+
+    row.parentNode.removeChild(row);
 }
 
 ipcRenderer.send('app_version');
