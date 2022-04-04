@@ -44,7 +44,7 @@ let
     todosRecursos,
     updateDownloaded;
 
-const db = new sqlite3.Database(upath.toUnix(upath.join(app.getPath('userData'), 'GestorSPAs.db')));
+const db = new sqlite3.Database(upath.toUnix(upath.join(app.getPath('userData'), 'fium.db')));
 const syncDB = {
     create: async (table, columns) => {
         let sql = `CREATE TABLE IF NOT EXISTS ${table} (${columns})`;
@@ -576,7 +576,7 @@ function execShellCommand(cmd) {
 }
 
 function createTrayIcon() {
-    tray = new Tray(upath.toUnix(upath.join(__dirname, 'img', 'icon_white.png')));
+    tray = new Tray(upath.toUnix(upath.join(__dirname, 'www', 'img', 'fiumLogo150x.png')));
 
     tray.setContextMenu(Menu.buildFromTemplate([
         {
@@ -604,11 +604,11 @@ async function createSettingsWindow() {
         minHeight: COMMON_WINDOW_PROPERTIES.minHeight,
         autoHideMenuBar: COMMON_WINDOW_PROPERTIES.autoHideMenuBar,
         frame: COMMON_WINDOW_PROPERTIES.frame,
-        icon: upath.toUnix(upath.join(__dirname, 'img', 'icon_green.png')),
+        icon: upath.toUnix(upath.join(__dirname, 'www', 'img', 'fiumLogo150x.png')),
         webPreferences: COMMON_WINDOW_PROPERTIES.webPreferences
     });
 
-    await settingsWindow.loadFile(upath.toUnix(upath.join(__dirname, 'settings.html')));
+    await settingsWindow.loadFile(upath.toUnix(upath.join(__dirname, 'www', 'settings.html')));
 
     settingsWindow.on('closed', () => {
         settingsWindow = null;
@@ -637,13 +637,13 @@ function createAboutWindow() {
         autoHideMenuBar: COMMON_WINDOW_PROPERTIES.autoHideMenuBar,
         frame: COMMON_WINDOW_PROPERTIES.frame,
         resizable: false,
-        icon: upath.toUnix(upath.join(__dirname, 'img', 'icon_green.png')),
+        icon: upath.toUnix(upath.join(__dirname, 'www', 'img', 'fiumLogo150x.png')),
         webPreferences: COMMON_WINDOW_PROPERTIES.webPreferences
     });
 
     aboutWindow.setResizable(false);
 
-    aboutWindow.loadFile(upath.toUnix(upath.join(__dirname, 'about.html')));
+    aboutWindow.loadFile(upath.toUnix(upath.join(__dirname, 'www', 'about.html')));
 
     aboutWindow.on('closed', () => {
         aboutWindow = null;
@@ -655,7 +655,7 @@ function createAboutWindow() {
             action: 'init',
             data: {
                 version: app.getVersion(),
-                icon: upath.toUnix(upath.join(__dirname, 'img', 'icon_green.png'))
+                icon: upath.toUnix(upath.join(__dirname, 'www', 'img', 'fiumLogo500x.png'))
             }
         });
     });
@@ -788,15 +788,15 @@ function createVhostsSection(oSPA, oENTORNO, oRECURSO) {
 }
 
 async function reloadApache() {
-    tray.setImage(upath.toUnix(upath.join(__dirname, 'img', 'icon_yellow.png')));
+    // tray.setImage(upath.toUnix(upath.join(__dirname, 'img', 'icon_yellow.png')));
     await execShellCommand(upath.toUnix(getConfig('APACHE_STOP_FILE')));
-    tray.setImage(upath.toUnix(upath.join(__dirname, 'img', 'icon_red.png')));
+    // tray.setImage(upath.toUnix(upath.join(__dirname, 'img', 'icon_red.png')));
     execShellCommand(upath.toUnix(getConfig('APACHE_START_FILE')));
     let isApacheRunning;
     do {
         isApacheRunning = await checkApacheRunning();
     } while (!isApacheRunning);
-    tray.setImage(upath.toUnix(upath.join(__dirname, 'img', 'icon_green.png')));
+    // tray.setImage(upath.toUnix(upath.join(__dirname, 'img', 'icon_green.png')));
 }
 
 function deleteItem(arg) {

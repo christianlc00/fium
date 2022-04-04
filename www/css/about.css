@@ -9,13 +9,13 @@ header, main, footer {
 }
 
 main {
-    background-color: #88b100;
+    background-color: #6785C1;
     height: 100%;
     color: white;
 }
 
 footer {
-    background-color: #88b100;
+    background-color: #6785C1;
     display: flex;
     justify-content: center;
     color: white;

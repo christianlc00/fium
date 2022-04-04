@@ -1,5 +1,5 @@
-appId: com.ever.spadh
-productName: 'SPA Development Helper'
+appId: com.ntt.fium
+productName: 'FIUM'
 publish:
   provider: github
   token: ${env.GH_TOKEN}
