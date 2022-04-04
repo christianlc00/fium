@@ -1,0 +1,44 @@
+.bc-ntt {
+  background-color: #6785c1 !important;
+}
+
+.c-ntt {
+  color: #6785c1 !important;
+}
+
+.collection a.collection-item {
+  color: #6785c1 !important;
+}
+
+.collection .collection-item.active {
+  color: #eafaf9 !important;
+  background-color: #6785c1;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track-piece {
+  background-color: #ebebeb;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #cbcbcb;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #909090;
+}
+
+nav {
+  background-color: #6785c1 !important;
+}
+
+.table-of-contents a.active {
+  border-left: 2px solid #6785c1 !important;
+}
+
+.table-of-contents a:hover {
+  border-left: 1px solid #6785c1 !important;
+}
