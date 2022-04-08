@@ -1091,6 +1091,6 @@ autoUpdater.on('error', () => {
     });
 
     if (choosed == 0) {
-        shell.openExternal('https://github.com/christianlc00/spa-development-helper/releases/latest');
+        shell.openExternal('https://github.com/christianlc00/fium/releases/latest');
     }
 });
